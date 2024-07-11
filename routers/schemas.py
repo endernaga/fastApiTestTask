@@ -10,7 +10,7 @@ class Node(BaseModel, abc.ABC):
 
 
 class StartNode(Node):
-    original: Node | None = None
+    original: Node | None | int = None
     type: str = "start"
 
     class Config:
@@ -19,7 +19,7 @@ class StartNode(Node):
 
 class MessageNode(Node):
     message: str
-    original: Node | None = None
+    original: Node | None | int = None
     status: Literal["pending", "sent", "opened"]
     type: str = "message"
 
@@ -28,8 +28,8 @@ class MessageNode(Node):
 
 
 class ConditionNode(Node):
-    yesNode: Node
-    noNode: Node
+    yesNode: Node | int
+    noNode: Node | int
     condition: str
     type: str = "condition"
 
@@ -45,7 +45,7 @@ class EndNode(Node):
 
 
 class WorkFlow(BaseModel):
-    start_node: StartNode | None = None
+    start_node: StartNode | None | int = None
 
     class Config:
         orm_mode = True

@@ -2,7 +2,7 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from database.database import SessionLocal, Base, engine
+from database.database import Base
 from database.models import Node
 
 

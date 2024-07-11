@@ -11,6 +11,8 @@ def get_node(db: Session, node_id: int):
 
 
 def create_node(db: Session, node: Node, prev_node: Type[int | None] = None):
+    if node.type == "condition" and not prev_node:
+        raise ValueError("Condition node must have previous node!")  # mush have node from what it need to do smth
     if prev_node and node.type == "start":
         raise TypeError("couldn't connect start node to other node. Start node cant have incoming node")
     if prev_node:
@@ -21,11 +23,17 @@ def create_node(db: Session, node: Node, prev_node: Type[int | None] = None):
         if node.type == "condition":
             db_node = models.Node(type=node.type, condition=node.condition)
             db.add(db_node)
+            if type(node.yesNode) == Node:
+                yesNode = create_node(db, node=node.yesNode)
+                db_node.yesNode = yesNode
+            else:
+                db_node.yesNode = node.yesNode
 
-            yesNode = create_node(db, node=node.yesNode)
-            noNode = create_node(db, node=node.noNode)
-            db_node.yesNode = yesNode
-            db_node.noNode = noNode
+            if type(node.noNode) == Node:
+                noNode = create_node(db, node=node.noNode)
+                db_node.noNode = noNode
+            else:
+                db_node.noNode = node.noNode
 
             db.add(db_node)
             db.commit()
@@ -46,7 +54,7 @@ def create_node(db: Session, node: Node, prev_node: Type[int | None] = None):
     return db_node
 
 
-def delete_node(db: Session, node_id: int): # it's function do full delete from selected node
+def delete_node(db: Session, node_id: int):  # it's function do full delete from selected node
     node = get_node(db, node_id)
     if node.type == "condition":
         delete_node(db, node.yesNode.id)
@@ -60,6 +68,30 @@ def delete_node(db: Session, node_id: int): # it's function do full delete from 
     return {"status": "success"}
 
 
+def update_node(db: Session, node_id: int, node_data: Node):
+    node = get_node(db, node_id)
+    if node.type == "condition":
+        if type(node_data.yesNode) == int:
+            node.yesNode_id = node_data.yesNode
+        else:
+            node.yesNode = create_node(db, node_data.yesNode)
+        if type(node_data.noNode) == int:
+            node.noNode_id = node_data.noNode
+        else:
+            node.noNode = create_node(db, node_data.noNode)
+    if type(node_data.original) == int:
+        node.original_id = node_data.original
+    else:
+        node.original = create_node(db, node_data.original)
+    attributes = ['condition', 'message', 'status']
+    for attr in attributes:
+        value = getattr(node_data, attr, None)
+        if value:
+            setattr(node, attr, value)
+
+    db.commit()
+
+
 if __name__ == "__main__":
     db = next(get_db())
 
@@ -68,4 +100,4 @@ if __name__ == "__main__":
     condition_node = ConditionNode(yesNode=message_node, noNode=message_node, condition="prev node status = opened")
     end_node = EndNode()
 
-    delete_node(db, 33)
+    create_node(db, message_node, 1)

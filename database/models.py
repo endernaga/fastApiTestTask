@@ -25,14 +25,14 @@ class Node(Base):
     status = Column(ChoiceType(STATUS), nullable=True)
     condition = Column(String, nullable=True)
     original_id = Column(Integer, ForeignKey("nodes.id"),
-                         nullable=True)  # OneToMany ref one messsage can have many parent's node TODO: only if kind == "condtion or message"
+                         nullable=True)
 
-    original = relationship("Node", remote_side=[id], backref=backref("children", uselist=True),
+    original = relationship("Node", remote_side=[id], backref=backref("children", uselist=False),
                             foreign_keys=[original_id])
 
     yesNode_id = Column(Integer, ForeignKey("nodes.id"),
-                        nullable=True)  # OneToOne ref TODO: only if kind == "condition"
-    noNode_id = Column(Integer, ForeignKey("nodes.id"), nullable=True)  # OneToOne ref
+                        nullable=True)
+    noNode_id = Column(Integer, ForeignKey("nodes.id"), nullable=True)
 
     yesNode = relationship("Node", foreign_keys=[yesNode_id], backref=backref("yesNode_parent", uselist=False),
                            remote_side=[id])
