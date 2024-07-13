@@ -40,17 +40,29 @@ def create_node(db: Session, node: Node, prev_node: Type[int | None] = None):
             db.refresh(db_node)
             return db_node
 
+        original = node.original
+        node.original = None
+
         db_node = models.Node(**node.dict())
         prev_node.original = db_node
-
+        db.add(db_node)
         db.commit()
         db.refresh(db_node)
+
+        if original:
+            create_node(db, original, db_node.id)
         return db_node
+
+    original = node.original
+    node.original = None
 
     db_node = models.Node(**node.dict())
     db.add(db_node)
     db.commit()
     db.refresh(db_node)
+
+    if original:
+        create_node(db, original, db_node.id)
     return db_node
 
 
@@ -95,9 +107,9 @@ def update_node(db: Session, node_id: int, node_data: Node):
 if __name__ == "__main__":
     db = next(get_db())
 
-    start_node = StartNode()
+    start_node = StartNode(original=MessageNode(message="Hello", status="opened", original=MessageNode(message="World", status="sent")))
     message_node = MessageNode(message="Hello World", status="opened")
     condition_node = ConditionNode(yesNode=message_node, noNode=message_node, condition="prev node status = opened")
     end_node = EndNode()
 
-    create_node(db, message_node, 1)
+    create_node(db, start_node)
