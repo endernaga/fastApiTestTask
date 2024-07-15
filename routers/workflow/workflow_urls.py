@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, List
 
 from fastapi import APIRouter, Depends, Body, HTTPException
 from sqlalchemy.orm import Session
@@ -25,6 +25,11 @@ async def create_workflow(workflow: WorkFlow, db: Session = Depends(get_db)):
 async def get_workflow(workflow_id: int, db: Session = Depends(get_db)):
     workflow = workflow_crud.get_workflow(db, workflow_id)
     return workflow
+
+
+@router.get("/workflow", response_model=List[WorkFlowDisplay])
+async def get_all_workflow(db: Session = Depends(get_db)):
+    return workflow_crud.get_all_workflows(db)
 
 
 @router.put("/workflow/{workflow_id}", response_model=None)

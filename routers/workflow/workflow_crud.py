@@ -29,6 +29,10 @@ def get_workflow(db: Session, workflow_id: int):
     return db.query(models.WorkFlow).filter(models.WorkFlow.id == workflow_id).first()
 
 
+def get_all_workflows(db: Session):
+    return db.query(models.WorkFlow).all()
+
+
 def delete_workflow(db: Session, workflow_id: int):
     workflow = get_workflow(db, workflow_id)
     if not workflow:
