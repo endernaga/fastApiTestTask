@@ -1,5 +1,5 @@
 import abc
-from typing import Literal, List
+from typing import Literal, Optional, Union
 
 from pydantic import BaseModel
 
@@ -10,11 +10,15 @@ class Node(BaseModel, abc.ABC):
 
 
 class StartNode(Node):
-    original: Node | None | int = None
+    original: Optional[Union[Node, int]] = None
     type: str = "start"
 
     class Config:
         orm_mode = True
+
+
+class StartNodeCreate(Node):
+    type: str = "start"
 
 
 class MessageNode(Node):
@@ -45,7 +49,15 @@ class EndNode(Node):
 
 
 class WorkFlow(BaseModel):
-    start_node: StartNode | None | int = None
+    start_node: Optional[Union[StartNodeCreate, int]] = None
+
+    class Config:
+        orm_mode = True
+
+
+class WorkFlowDisplay(BaseModel):
+    id: int
+    start_node_id: Optional[Union[StartNode, int]] = None
 
     class Config:
         orm_mode = True
