@@ -102,12 +102,14 @@ def update_node(db: Session, node_id: int, node_data: Node):
             setattr(node, attr, value)
 
     db.commit()
+    return node
 
 
 if __name__ == "__main__":
     db = next(get_db())
 
-    start_node = StartNode(original=MessageNode(message="Hello", status="opened", original=MessageNode(message="World", status="sent")))
+    start_node = StartNode(
+        original=MessageNode(message="Hello", status="opened", original=MessageNode(message="World", status="sent")))
     message_node = MessageNode(message="Hello World", status="opened")
     condition_node = ConditionNode(yesNode=message_node, noNode=message_node, condition="prev node status = opened")
     end_node = EndNode()
